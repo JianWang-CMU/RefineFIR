@@ -323,8 +323,8 @@ if __name__ == "__main__":
         if get_rank() == 0:
             if i % 500 == 0:
                 with torch.no_grad():
-                    style, _ = generator.encode(im_lq, target_id)
-                    w_im, _ = generator.decoder(style, input_is_latent=True)
+                    style, _ = g_module.encode(im_lq, target_id)
+                    w_im, _ = g_module.decoder(style, input_is_latent=True)
                     id_im = generator(im_lq, torch.cat([target_id[1:], target_id[[0]]], 0))
 
                     sample = torch.cat([im_hq, im_lq, fake_img, id_im, w_im], 0)
