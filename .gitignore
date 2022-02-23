@@ -1,7 +1,7 @@
 checkpoint*
 runs*
 *.pth
-*.ipynb
+stylize.ipynb
 *.sw*
 train_ae.py
 train_direction.py
