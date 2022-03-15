@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 import timeit
 
-# user specifies filenames here
+# specify filenames here
 file_extension = 'png'
 results_folder = 'result'
 # end

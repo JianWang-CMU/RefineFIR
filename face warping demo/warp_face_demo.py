@@ -7,7 +7,7 @@ from scipy import interpolate
 import time
 import os
 
-# user specifies filenames here
+# specify filenames here
 file_imSource = 'rihanna1.jpeg'
 file_imTarget = 'rihanna2.jpeg'
 # file_imTarget = ''
@@ -44,8 +44,8 @@ if file_imTarget != '':
 	imTarget = im
 	imTarget_pt2d = im_pt2d
 else:
-	mapH = 400
-	mapW = 400
+	mapH = 800
+	mapW = 800
 	imTarget = np.zeros((mapH, mapW, 3))
 	imTarget_pt2d = np.transpose(np.vstack((uv[0,:]*mapW, uv[1,:]*mapH)))
 
@@ -61,7 +61,7 @@ def warpFace(imSource, imTarget, imSource_pt2d, imTarget_pt2d, T):
 	numPxls = imTarget_H * imTarget_W
 	inds = np.zeros((numPxls,))
 	target_triangles = np.zeros((2, numPxls))
-	IND = np.arange(numPxls)
+	# IND = np.arange(numPxls)
 	cnt = 0
 	start_time = time.time()
 
@@ -72,14 +72,62 @@ def warpFace(imSource, imTarget, imSource_pt2d, imTarget_pt2d, T):
 		dstTri = np.array([[imTarget_pt2d[int(T[i, 0]), 0], imTarget_pt2d[int(T[i, 0]), 1]], \
 						   [imTarget_pt2d[int(T[i, 1]), 0], imTarget_pt2d[int(T[i, 1]), 1]], \
 						   [imTarget_pt2d[int(T[i, 2]), 0], imTarget_pt2d[int(T[i, 2]), 1]]]).astype(np.float32)
-		# start_time = time.time()
-		warp_mat = cv.getAffineTransform(dstTri, srcTri)
-		# print("--- %s seconds ---" % (time.time() - start_time))
-		p = path.Path(dstTri)
-		inMask = p.contains_points(xxyy)
 
-		ind = IND[inMask]
-		target_triangle = warp_mat @ np.vstack((xx[inMask], yy[inMask], np.ones((1, ind.shape[0]))))
+		warp_mat = cv.getAffineTransform(dstTri, srcTri)
+
+		# start_time = time.time()
+		# p = path.Path(dstTri)
+		# inMask = p.contains_points(xxyy)
+		# # print("--- %s seconds ---" % (time.time() - start_time))
+		# ind = IND[inMask]
+		# target_triangle = warp_mat @ np.vstack((xx[inMask], yy[inMask], np.ones((1, ind.shape[0]))))
+
+		# start_time = time.time()
+		# another method: by three lines manually, still slow
+		# a0 = 0
+		# a1 = 1
+		# a2 = 2
+		# a = (dstTri[a0, 1] - dstTri[a2, 1]) * (dstTri[a1, 0] - dstTri[a2, 0]) - (dstTri[a1, 1] - dstTri[a2, 1]) * (dstTri[a0, 0] - dstTri[a2, 0])
+		# aa = (xxyy[:,1] - dstTri[a2, 1]) * (dstTri[a1, 0] - dstTri[a2, 0]) - (dstTri[a1, 1] - dstTri[a2, 1]) * (xxyy[:,0] - dstTri[a2, 0])
+		# a0 = 1
+		# a1 = 0
+		# a2 = 2
+		# b = (dstTri[a0, 1] - dstTri[a2, 1]) * (dstTri[a1, 0] - dstTri[a2, 0]) - (dstTri[a1, 1] - dstTri[a2, 1]) * (
+		# 			dstTri[a0, 0] - dstTri[a2, 0])
+		# bb = (xxyy[:,1]- dstTri[a2, 1]) * (dstTri[a1, 0] - dstTri[a2, 0]) - (dstTri[a1, 1] - dstTri[a2, 1]) * (
+		# 			xxyy[:,0] - dstTri[a2, 0])
+		# a0 = 2
+		# a1 = 0
+		# a2 = 1
+		# c = (dstTri[a0, 1] - dstTri[a2, 1]) * (dstTri[a1, 0] - dstTri[a2, 0]) - (dstTri[a1, 1] - dstTri[a2, 1]) * (
+		# 			dstTri[a0, 0] - dstTri[a2, 0])
+		# cc = (xxyy[:,1] - dstTri[a2, 1]) * (dstTri[a1, 0] - dstTri[a2, 0]) - (dstTri[a1, 1] - dstTri[a2, 1]) * (
+		# 			xxyy[:,0] - dstTri[a2, 0])
+		# # print("--- %s seconds ---" % (time.time() - start_time))
+		# # inMask = (aa * a >= 0) * (bb * b >= 0) * (cc * c >= 0)
+		# inMask = ((aa >= 0) == (a >= 0)) & ((bb >= 0) == (b >= 0)) & (((cc >= 0) & (c >= 0)))
+		# # print("--- %s seconds ---a" % (time.time() - start_time))
+
+		# ind = IND[inMask]
+		# target_triangle = warp_mat @ np.vstack((xx[inMask], yy[inMask], np.ones((1, ind.shape[0]))))
+
+		# another method: only the ROI
+		# start_time = time.time()
+		xmin = int(dstTri[:, 0].min())
+		xmax = int(dstTri[:, 0].max())
+		ymin = int(dstTri[:, 1].min())
+		ymax = int(dstTri[:, 1].max())
+		xx_, yy_ = np.mgrid[xmin:xmax+1, ymin:ymax+1]
+		xx_ = xx_.flatten()
+		yy_ = yy_.flatten()
+		xxyy_ = np.transpose(np.vstack((xx_, yy_)))
+		p_ = path.Path(dstTri)
+		inMask_ = p_.contains_points(xxyy_)
+		# print("--- %s seconds ---a" % (time.time() - start_time))
+		xxyy_selected_x = xx_[inMask_]
+		xxyy_selected_y = yy_[inMask_]
+		ind = xxyy_selected_x * imTarget_H + xxyy_selected_y
+		target_triangle = warp_mat @ np.vstack((xxyy_selected_x, xxyy_selected_y, np.ones((1, ind.shape[0]))))
 
 		l = ind.shape[0]
 		inds[cnt:cnt + l] = ind
