@@ -12,6 +12,8 @@ file_imSource = 'rihanna1.jpeg'
 file_imTarget = 'rihanna2.jpeg'
 # file_imTarget = ''
 
+# todo: sideface, use symmetry of face
+
 results_folder = 'result'
 # end
 
