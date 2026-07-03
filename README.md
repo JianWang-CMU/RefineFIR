@@ -31,6 +31,7 @@ Put the generator checkpoint and ArcFace identity encoder in `weights/`:
 ```text
 weights/latest.pt
 weights/model_ir_se50.pth
+weights/stylegan2-256-550000.pt
 ```
 
 The release checkpoint is available on Hugging Face:
@@ -52,6 +53,35 @@ python infer_mediapipe.py \
 ```
 
 Use `--skip-degrade` if your input image is already degraded and should be restored directly.
+
+## Training
+
+The training code is split into:
+
+- `training_dataset.py`: loads clean same-identity image pairs and precomputed warped references.
+- `train.py`: trains RefineFIR using GAN, LPIPS, identity, and degradation-cycle losses.
+
+The historical training data uses precomputed Snap/XCV warped references. The public inference path uses MediaPipe, but this training artifact does not require releasing Snap/XCV code because the warped images are already generated.
+
+Training artifacts are available on Hugging Face:
+
+- [JianWang1/RefineFIR-TrainingData](https://huggingface.co/datasets/JianWang1/RefineFIR-TrainingData)
+
+Example:
+
+```bash
+python train.py \
+  --image-root data/CelebHQRefForRelease \
+  --pair-list data/celebref_list_256_jw_0403.pkl \
+  --warp-root data/celebaref_warped_snapCV_jw_0403/celebaref_warped_snapCV_jw_0403 \
+  --stylegan-weight weights/stylegan2-256-550000.pt \
+  --id-weight weights/model_ir_se50.pth \
+  --output checkpoints/refinefir_256 \
+  --iter 800000 \
+  --batch 4
+```
+
+To continue from a released checkpoint, add `--ckpt weights/latest.pt` and set `--iter` to the target total iteration count.
 
 ## CelebRef-FineDetail
 
