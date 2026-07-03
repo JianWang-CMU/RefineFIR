@@ -33,7 +33,9 @@ weights/latest.pt
 weights/model_ir_se50.pth
 ```
 
-The release checkpoint is being uploaded to Hugging Face.
+The release checkpoint is available on Hugging Face:
+
+- [JianWang1/RefineFIR-MediaPipe](https://huggingface.co/JianWang1/RefineFIR-MediaPipe)
 
 ## Inference
 
@@ -65,7 +67,9 @@ fine_detail_raw_extra/
 metadata.csv
 ```
 
-The dataset is being uploaded to Hugging Face.
+The dataset is available on Hugging Face:
+
+- [JianWang1/CelebRef-FineDetail](https://huggingface.co/datasets/JianWang1/CelebRef-FineDetail)
 
 ## Citation
 
