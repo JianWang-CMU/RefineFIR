@@ -10,6 +10,63 @@ Due to several constraints, including the original implementation no longer bein
 - [Poster](https://jianwang-cmu.github.io/25Refine/wacv25-2727-poster.pdf)
 - [Video](https://www.dropbox.com/scl/fi/kzvj2aw95wiaxa3mk2fpg/Copy-or-not-WACV.mp4?rlkey=jq4bi8698zdm5u283lltb86yw&st=m66pom5j&dl=0)
 
+## Status
+
+The historical internal inference path used Snap/XCV face warping, which is not included here. This public version uses a MediaPipe Face Mesh based warp fallback. In our internal checks, the XCV warp is usually stronger, but the MediaPipe path is easier to release and can run without proprietary dependencies.
+
+## Installation
+
+```bash
+conda create -n refinefir python=3.10 -y
+conda activate refinefir
+pip install -r requirements.txt
+```
+
+Install a CUDA-enabled PyTorch build that matches your machine if the default `torch` wheel is not appropriate.
+
+## Checkpoints
+
+Put the generator checkpoint and ArcFace identity encoder in `weights/`:
+
+```text
+weights/latest.pt
+weights/model_ir_se50.pth
+```
+
+The release checkpoint is being uploaded to Hugging Face.
+
+## Inference
+
+The input and reference should be aligned face images. The script optionally synthesizes a low-quality input using the training degradation before restoration.
+
+```bash
+python infer_mediapipe.py \
+  --input examples/input.png \
+  --reference examples/reference.png \
+  --checkpoint weights/latest.pt \
+  --id-weight weights/model_ir_se50.pth \
+  --output outputs/restored.png \
+  --save-debug
+```
+
+Use `--skip-degrade` if your input image is already degraded and should be restored directly.
+
+## CelebRef-FineDetail
+
+We also curate a small evaluation dataset, **CelebRef-FineDetail**, for reference-based restoration of identity-specific fine details. It contains public internet face images with attributes such as moles, freckles, tattoos, distinctive eyebrows, facial hair, scars, and piercings. The goal is to test whether the restoration can copy details from a same-identity reference image instead of hallucinating them.
+
+The dataset layout follows:
+
+```text
+raw/
+aligned/
+smallYC_raw/
+fine_detail_raw_extra/
+metadata.csv
+```
+
+The dataset is being uploaded to Hugging Face.
+
 ## Citation
 
 ```bibtex

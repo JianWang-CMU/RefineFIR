@@ -1,0 +1,10 @@
+torch
+torchvision
+opencv-python
+numpy
+scipy
+matplotlib
+mediapipe==0.10.21
+tqdm
+lmdb
+
